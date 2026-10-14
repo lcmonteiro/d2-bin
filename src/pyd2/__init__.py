@@ -3,6 +3,8 @@
     >>> import pyd2
     >>> pyd2.render("a -> b", theme="c4")       # D2 text -> SVG text
     >>> pyd2.render_file("flow.d2")             # flow.d2 -> flow.svg
+    >>> pyd2.validate("a -> b")                 # raises D2Error if invalid
+    >>> pyd2.format("a->b")                     # 'a -> b\n'
     >>> pyd2.executable()                       # path to the bundled d2
     >>> pyd2.run("in.d2", "out.svg", "--theme=0")
 
@@ -27,11 +29,15 @@ __all__ = [
     "Options",
     "__version__",
     "executable",
+    "format",
+    "format_file",
     "render",
     "render_file",
     "run",
     "theme_id",
     "theme_name",
+    "validate",
+    "validate_file",
 ]
 
 try:
@@ -76,3 +82,4 @@ from .render import (  # noqa: E402
     theme_id,
     theme_name,
 )
+from .source import format, format_file, validate, validate_file  # noqa: E402, A004
