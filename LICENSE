@@ -22,6 +22,6 @@ SOFTWARE.
 
 ---
 
-The d2 binary shipped in the wheels (d2_bin/bin/) is D2 by Terrastruct, Inc.,
+The d2 binary shipped in the wheels (pyd2/bin/) is D2 by Terrastruct, Inc.,
 distributed unmodified under the Mozilla Public License 2.0; its license is
-included as d2_bin/bin/D2-LICENSE.txt. Source code: https://github.com/terrastruct/d2
+included as pyd2/bin/D2-LICENSE.txt. Source code: https://github.com/terrastruct/d2

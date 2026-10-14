@@ -1,10 +1,10 @@
-"""Move d2-bin to a new D2 release: pin the archive hashes and set the package version.
+"""Move pyd2 to a new D2 release: pin the archive hashes and set the package version.
 
     python scripts/update_d2.py              # latest D2 release from GitHub
     python scripts/update_d2.py v0.7.2       # a given release
 
 Downloads the six release archives, records their SHA-256 in
-src/d2_bin/d2_release.json and sets the version in pyproject.toml to the D2
+src/pyd2/d2_release.json and sets the version in pyproject.toml to the D2
 version (v0.7.2 -> 0.7.2). Prints the new version, or nothing when already
 pinned. Used weekly by .github/workflows/update.yml, which opens a PR.
 """
@@ -21,14 +21,14 @@ from collections.abc import Callable
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_FILE = ROOT / "src" / "d2_bin" / "d2_release.json"
+RELEASE_FILE = ROOT / "src" / "pyd2" / "d2_release.json"
 PYPROJECT = ROOT / "pyproject.toml"
 LATEST_API = "https://api.github.com/repos/terrastruct/d2/releases/latest"
 VERSION_RE = re.compile(r"^v\d+\.\d+\.\d+$")
 
 
 def _get(url: str) -> bytes:
-    request = urllib.request.Request(url, headers={"User-Agent": "d2-bin-updater"})
+    request = urllib.request.Request(url, headers={"User-Agent": "pyd2-updater"})
     token = os.environ.get("GITHUB_TOKEN")
     if token and url.startswith("https://api.github.com/"):
         request.add_header("Authorization", f"Bearer {token}")

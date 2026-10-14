@@ -1,10 +1,10 @@
-"""The official D2 diagram binary (https://d2lang.com), packaged for pip and uv.
+"""D2 for Python: the official D2 diagram binary (https://d2lang.com) and a render API.
 
-    >>> import d2_bin
-    >>> d2_bin.render("a -> b", theme="c4")       # D2 text -> SVG text
-    >>> d2_bin.render_file("flow.d2")             # flow.d2 -> flow.svg
-    >>> d2_bin.executable()                       # path to the bundled d2
-    >>> d2_bin.run("in.d2", "out.svg", "--theme=0")
+    >>> import pyd2
+    >>> pyd2.render("a -> b", theme="c4")       # D2 text -> SVG text
+    >>> pyd2.render_file("flow.d2")             # flow.d2 -> flow.svg
+    >>> pyd2.executable()                       # path to the bundled d2
+    >>> pyd2.run("in.d2", "out.svg", "--theme=0")
 
 The package version follows the D2 release it ships (0.7.1 ships D2 v0.7.1;
 packaging-only fixes are post-releases such as 0.7.1.post1).
@@ -35,7 +35,7 @@ __all__ = [
 ]
 
 try:
-    __version__ = metadata.version("d2-bin")
+    __version__ = metadata.version("pyd2")
 except metadata.PackageNotFoundError:  # running from a source tree that is not installed
     __version__ = "0+unknown"
 
@@ -53,7 +53,7 @@ def executable() -> str:
     path = resources.files(__name__).joinpath("bin").joinpath(name)
     if not path.is_file():
         raise FileNotFoundError(
-            f"the d2 binary is missing from {path}; reinstall d2-bin (e.g. `uv pip install --reinstall d2-bin`)"
+            f"the d2 binary is missing from {path}; reinstall pyd2 (e.g. `uv pip install --reinstall pyd2`)"
         )
     return str(path)
 

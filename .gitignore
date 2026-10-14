@@ -4,4 +4,4 @@ __pycache__/
 .pytest_cache/
 dist/
 # D2 binary and license placed by the build hook for editable installs
-src/d2_bin/bin/
+src/pyd2/bin/

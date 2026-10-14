@@ -55,7 +55,7 @@ jobs:
         run: |
           uv build --sdist --out-dir dist
           for platform in linux-amd64 linux-arm64 macos-amd64 macos-arm64 windows-amd64 windows-arm64; do
-            D2_BIN_PLATFORM=$platform uv build --wheel --out-dir dist
+            PYD2_PLATFORM=$platform uv build --wheel --out-dir dist
           done
           ls -l dist
 
@@ -64,13 +64,13 @@ jobs:
           version=$(uv run --no-project python -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
           for tag in manylinux2014_x86_64.musllinux_1_1_x86_64 manylinux2014_aarch64.musllinux_1_1_aarch64 \
                      macosx_10_12_x86_64 macosx_11_0_arm64 win_amd64 win_arm64; do
-            wheel="dist/d2_bin-${version}-py3-none-${tag}.whl"
+            wheel="dist/pyd2-${version}-py3-none-${tag}.whl"
             test -f "$wheel" || { echo "missing $wheel"; exit 1; }
             case "$tag" in win*) exe=d2.exe ;; *) exe=d2 ;; esac
-            unzip -l "$wheel" | grep -q "d2_bin/bin/${exe}$"
-            unzip -l "$wheel" | grep -q "d2_bin/bin/D2-LICENSE.txt$"
+            unzip -l "$wheel" | grep -q "pyd2/bin/${exe}$"
+            unzip -l "$wheel" | grep -q "pyd2/bin/D2-LICENSE.txt$"
           done
-          ! tar tzf dist/*.tar.gz | grep -q 'd2_bin/bin/'
+          ! tar tzf dist/*.tar.gz | grep -q 'pyd2/bin/'
 
       - name: Run the Linux wheel
         run: |
