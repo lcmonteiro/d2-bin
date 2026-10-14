@@ -2,7 +2,7 @@ name: Release
 
 # Push a tag v<version> (matching pyproject.toml) to build the six platform
 # wheels and the sdist, smoke-test them on real runners and attach them to a
-# GitHub release for the tag. (d2-bin is not published to PyPI.)
+# GitHub release for the tag. (pyd2 is not published to PyPI.)
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
 
       - name: Build wheel
         env:
-          D2_BIN_PLATFORM: ${{ matrix.platform }}
+          PYD2_PLATFORM: ${{ matrix.platform }}
         run: uv build --wheel --out-dir dist
 
       - uses: actions/upload-artifact@v4

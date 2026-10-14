@@ -1,6 +1,6 @@
 """Render D2 to SVG from Python, with D2's options as plain arguments.
 
-    >>> from d2_bin import render, render_file
+    >>> from pyd2 import render, render_file
     >>> svg = render("a -> b", theme="c4", layout="elk")      # D2 text -> SVG text
     >>> render_file("flow.d2", theme="dark-mauve")             # flow.d2 -> flow.svg
 

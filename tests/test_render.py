@@ -2,8 +2,8 @@
 
 import pytest
 
-import d2_bin
-from d2_bin import D2Error, Options, render, render_file
+import pyd2
+from pyd2 import D2Error, Options, render, render_file
 
 FLOW = 'user: User\napi: Auth API\nuser -> api: "POST /reset {email}"\n'
 
@@ -78,10 +78,10 @@ def test_options_object_or_keywords_not_both():
 
 
 def test_theme_names():
-    assert d2_bin.theme_id("C4") == 303 and d2_bin.theme_name(303) == "c4" and d2_bin.theme_name(999) == "999"
-    assert set(d2_bin.THEMES) == set(d2_bin.LIGHT_THEMES) | set(d2_bin.DARK_THEMES)
+    assert pyd2.theme_id("C4") == 303 and pyd2.theme_name(303) == "c4" and pyd2.theme_name(999) == "999"
+    assert set(pyd2.THEMES) == set(pyd2.LIGHT_THEMES) | set(pyd2.DARK_THEMES)
 
 
-def test_another_d2_binary_can_be_used(tmp_path):
+def test_another_pyd2ary_can_be_used(tmp_path):
     with pytest.raises((FileNotFoundError, PermissionError, OSError)):
         render(FLOW, d2=str(tmp_path / "no-such-d2"))

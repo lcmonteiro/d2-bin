@@ -1,14 +1,14 @@
-"""Hatch build hook: put the official D2 binary (and its license) into the d2-bin wheel.
+"""Hatch build hook: put the official D2 binary (and its license) into the pyd2 wheel.
 
 Every wheel build downloads the pinned D2 release for the target platform,
-checks its SHA-256 against ``src/d2_bin/d2_release.json``, and ships
-``d2_bin/bin/d2`` (``d2.exe`` on Windows) plus ``d2_bin/bin/D2-LICENSE.txt``.
+checks its SHA-256 against ``src/pyd2/d2_release.json``, and ships
+``pyd2/bin/d2`` (``d2.exe`` on Windows) plus ``pyd2/bin/D2-LICENSE.txt``.
 The wheel is tagged for that platform; there is nothing to compile.
 
 Environment:
-- ``D2_BIN_PLATFORM=<linux|macos|windows>-<amd64|arm64>``: build for another
+- ``PYD2_PLATFORM=<linux|macos|windows>-<amd64|arm64>``: build for another
   platform (the release workflow builds all six from one runner).
-- ``D2_BIN_CACHE``: where downloaded archives are kept (default: the user cache folder).
+- ``PYD2_CACHE``: where downloaded archives are kept (default: the user cache folder).
 """
 
 from __future__ import annotations
@@ -28,8 +28,8 @@ from pathlib import Path
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
 ROOT = Path(__file__).parent
-RELEASE_FILE = ROOT / "src" / "d2_bin" / "d2_release.json"
-EDITABLE_BIN = ROOT / "src" / "d2_bin" / "bin"
+RELEASE_FILE = ROOT / "src" / "pyd2" / "d2_release.json"
+EDITABLE_BIN = ROOT / "src" / "pyd2" / "bin"
 LICENSE_NAME = "D2-LICENSE.txt"
 
 # Wheel platform tags for cross-builds. D2 is a static Go binary, so the oldest common baselines work.
@@ -52,15 +52,15 @@ def host_platform() -> str:
 
 
 def cache_dir() -> Path:
-    if os.environ.get("D2_BIN_CACHE"):
-        return Path(os.environ["D2_BIN_CACHE"])
+    if os.environ.get("PYD2_CACHE"):
+        return Path(os.environ["PYD2_CACHE"])
     if platform.system() == "Windows":
         base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
     elif platform.system() == "Darwin":
         base = Path.home() / "Library" / "Caches"
     else:
         base = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
-    return base / "d2-bin"
+    return base / "pyd2"
 
 
 def fetch_archive(release: dict, target: str) -> bytes:
@@ -121,7 +121,7 @@ class D2BundleHook(BuildHookInterface):
         if self.target_name != "wheel":
             return
         release = json.loads(RELEASE_FILE.read_text(encoding="utf-8"))
-        cross = os.environ.get("D2_BIN_PLATFORM")
+        cross = os.environ.get("PYD2_PLATFORM")
         target = cross or host_platform()
         archive = fetch_archive(release, target)
 
@@ -130,9 +130,9 @@ class D2BundleHook(BuildHookInterface):
             extract(archive, target, EDITABLE_BIN)
             return
 
-        staging = Path(tempfile.mkdtemp(prefix="d2-bin-"))
+        staging = Path(tempfile.mkdtemp(prefix="pyd2-"))
         for path in extract(archive, target, staging):
-            build_data["force_include"][str(path)] = f"d2_bin/bin/{path.name}"
+            build_data["force_include"][str(path)] = f"pyd2/bin/{path.name}"
         build_data["pure_python"] = False
         plat = WHEEL_TAGS[target] if cross else sysconfig.get_platform().replace("-", "_").replace(".", "_")
         build_data["tag"] = f"py3-none-{plat}"

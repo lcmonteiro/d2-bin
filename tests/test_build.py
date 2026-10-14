@@ -50,7 +50,7 @@ class Response(io.BytesIO):
 @pytest.fixture
 def release(monkeypatch, tmp_path):
     archive = make_archive()
-    monkeypatch.setenv("D2_BIN_CACHE", str(tmp_path / "cache"))
+    monkeypatch.setenv("PYD2_CACHE", str(tmp_path / "cache"))
     data = {"version": "v9.9.9", "url": "https://example.invalid/{version}/{platform}.tar.gz", "sha256": {"linux-amd64": hashlib.sha256(archive).hexdigest()}}
     return data, archive
 
@@ -93,7 +93,7 @@ def test_host_platform(monkeypatch, system, machine, expected):
 
 
 def test_every_pinned_platform_has_a_wheel_tag():
-    pinned = json.loads((ROOT / "src/d2_bin/d2_release.json").read_text())
+    pinned = json.loads((ROOT / "src/pyd2/d2_release.json").read_text())
     assert set(pinned["sha256"]) == set(hook.WHEEL_TAGS)
 
 
@@ -105,7 +105,7 @@ def files(tmp_path):
     release_file = tmp_path / "d2_release.json"
     release_file.write_text(json.dumps({"comment": "x", "version": "v0.7.1", "url": "https://dl/{version}/{platform}", "sha256": {"linux-amd64": "a", "macos-arm64": "b"}}))
     pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text('[project]\nname = "d2-bin"\nversion = "0.7.1.post1"\n')
+    pyproject.write_text('[project]\nname = "pyd2"\nversion = "0.7.1.post1"\n')
     return release_file, pyproject
 
 

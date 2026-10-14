@@ -1,5 +1,5 @@
 {
-  "comment": "Official D2 release bundled into the d2-bin wheels. Hashes are of the release archives on GitHub (D2 publishes no checksum file). Updated by scripts/update_d2.py.",
+  "comment": "Official D2 release bundled into the pyd2 wheels. Hashes are of the release archives on GitHub (D2 publishes no checksum file). Updated by scripts/update_d2.py.",
   "version": "v0.7.1",
   "url": "https://github.com/terrastruct/d2/releases/download/{version}/d2-{version}-{platform}.tar.gz",
   "sha256": {
