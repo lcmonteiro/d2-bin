@@ -31,6 +31,12 @@ def test_render_file_matches_render(tmp_path):
     assert render_file(tmp_path / "flow.d2", layout="elk").read_text() == render(FLOW, layout="elk")
 
 
+def test_render_file_resolves_imports_next_to_the_file(tmp_path):
+    (tmp_path / "shared.d2").write_text("db: Database\n")
+    (tmp_path / "flow.d2").write_text("...@shared.d2\napi -> db\n")
+    assert "Database" in render_file(tmp_path / "flow.d2").read_text()
+
+
 def test_relative_imports_resolve_from_cwd(tmp_path):
     (tmp_path / "shared.d2").write_text("db: Database\n")
     svg = render("...@shared.d2\napi -> db\n", cwd=tmp_path)

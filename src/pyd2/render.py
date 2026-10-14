@@ -175,7 +175,9 @@ def render_file(
     if not source.is_file():
         raise FileNotFoundError(f"no D2 file at {source}")
     output = Path(output) if output is not None else source.with_suffix(".svg")
-    _run([*opts.args(), str(source), str(output)], source.name, d2, text=True)
+    output = output.resolve()
+    # d2 runs next to the file: on Windows it mangles absolute input paths and then cannot resolve imports.
+    _run([*opts.args(), source.name, str(output)], source.name, d2, text=True, cwd=source.resolve().parent)
     if not output.is_file():
         raise D2Error(f"d2 failed on {source.name}: no SVG was written to {output}")
     return output

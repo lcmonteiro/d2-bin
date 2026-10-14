@@ -87,3 +87,21 @@ def test_format_file_errors(tmp_path):
     assert bad.read_text() == "a -> \n"
     with pytest.raises(FileNotFoundError):
         pyd2.format_file(tmp_path / "missing.d2")
+
+
+def test_format_file_keeps_crlf_line_endings(tmp_path):
+    path = tmp_path / "flow.d2"
+    path.write_bytes(b"a -> b\r\nc: x\r\n")
+    assert pyd2.format_file(path, check=True) is False and pyd2.format_file(path) is False
+    path.write_bytes(b"a->b\r\nc:   x\r\n")
+    assert pyd2.format_file(path) is True and path.read_bytes() == b"a -> b\r\nc: x\r\n"
+
+
+def test_file_functions_accept_relative_paths(tmp_path, monkeypatch):
+    (tmp_path / "sub").mkdir()
+    (tmp_path / "sub" / "shared.d2").write_text("db: Database\n")
+    (tmp_path / "sub" / "flow.d2").write_text("...@shared.d2\napi -> db\n")
+    monkeypatch.chdir(tmp_path)
+    pyd2.validate_file("sub/flow.d2")
+    assert pyd2.render_file("sub/flow.d2", "out.svg") == tmp_path / "out.svg"
+    assert "Database" in (tmp_path / "out.svg").read_text()

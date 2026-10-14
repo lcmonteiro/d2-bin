@@ -36,7 +36,7 @@ def validate(source: str, *, cwd: PathLike | None = None, d2: str | None = None)
 def validate_file(source: PathLike, *, d2: str | None = None) -> None:
     """Raise :class:`~pyd2.D2Error` if a ``.d2`` file does not compile (imports resolve next to it)."""
     path = _existing(source)
-    _run([*_COMPILE, str(path), "-"], path.name, d2)
+    _run([*_COMPILE, path.name, "-"], path.name, d2, cwd=path.resolve().parent)  # see render_file
 
 
 def format(source: str, *, d2: str | None = None) -> str:  # noqa: A001 - mirrors `d2 fmt`
@@ -48,15 +48,18 @@ def format_file(source: PathLike, *, check: bool = False, d2: str | None = None)
     """Format a ``.d2`` file in place; return True if it changed (or, with ``check``, would change).
 
     With ``check=True`` the file is left untouched, like ``d2 fmt --check``.
+    Line endings are not a formatting change: a CRLF file stays CRLF.
     """
     path = _existing(source)
     with open(path, encoding="utf-8", newline="") as handle:
-        text = handle.read()
+        raw = handle.read()
+    text = raw.replace("\r\n", "\n")
     formatted = _format(text, path.name, d2)
     if formatted == text:
         return False
     if not check:
-        with open(path, "w", encoding="utf-8", newline="") as handle:
+        newline = "\r\n" if "\r\n" in raw else "\n"
+        with open(path, "w", encoding="utf-8", newline=newline) as handle:
             handle.write(formatted)
     return True
 
