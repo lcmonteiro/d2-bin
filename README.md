@@ -40,7 +40,24 @@ The same options as an object: `Options(theme="c4", layout="elk")`, passed as
 - `THEMES`, `LIGHT_THEMES`, `DARK_THEMES`, `theme_id("c4")` and `theme_name(303)`
   map theme names to numbers and back.
 
-Lower level:
+### Validate and format
+
+```python
+import pyd2
+
+pyd2.validate("a -> b")                    # raises pyd2.D2Error if the diagram does not compile
+pyd2.validate_file("flow.d2")              # imports resolve next to the file
+pyd2.format("a->b")                        # 'a -> b\n'
+pyd2.format_file("flow.d2")                # rewrites the file; True if it changed
+pyd2.format_file("flow.d2", check=True)    # leaves the file; True if it would change
+```
+
+`validate` compiles the diagram the way rendering does, so it reports anything
+a render would: unknown shapes, keywords or variables, bad values, missing
+imports. (`d2 validate` only checks the syntax in D2 v0.7.1.) `format` is
+`d2 fmt`: it only parses, so it formats anything that is syntactically D2.
+
+### Lower level
 
 ```python
 import pyd2

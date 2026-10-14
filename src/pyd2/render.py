@@ -11,6 +11,7 @@ Failures raise :class:`D2Error` with D2's own message.
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -128,12 +129,16 @@ def _options(options: Options | None, overrides: dict) -> Options:
     return options if options is not None else Options(**overrides)
 
 
+# d2 prefixes some errors with the Go function that raised them ("oss.terrastruct.com/d2/d2cli.validateCmd: ").
+_GO_FUNC = re.compile(r"^\S+\.\w+Cmd: ")
+
+
 def _run(args: list[str], what: str, d2: str | None, **kwargs) -> subprocess.CompletedProcess:
     proc = subprocess.run([d2 or executable(), *args], capture_output=True, check=False, **kwargs)
     if proc.returncode != 0:
         stderr = proc.stderr if isinstance(proc.stderr, str) else proc.stderr.decode("utf-8", "replace")
         lines = [line for line in stderr.strip().splitlines() if line.strip()]
-        detail = lines[-1].removeprefix("err: ") if lines else f"exit code {proc.returncode}"
+        detail = _GO_FUNC.sub("", lines[-1].removeprefix("err: ")) if lines else f"exit code {proc.returncode}"
         raise D2Error(f"d2 failed on {what}: {detail}", stderr)
     return proc
 
