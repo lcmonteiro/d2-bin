@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, python-version: "3.9" }
+          - { os: ubuntu-latest, python-version: "3.13" }
+          - { os: macos-latest, python-version: "3.13" }
+          - { os: windows-latest, python-version: "3.13" }
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      # The editable install runs hatch_build.py, which downloads, verifies and
+      # places the real d2 for this runner, so the tests use the real binary.
+      - name: Install
+        run: uv sync --locked
+
+      - name: Run tests
+        run: uv run pytest -v
+
+  wheels:
+    name: Cross-build all wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Build sdist and six platform wheels
+        run: |
+          uv build --sdist --out-dir dist
+          for platform in linux-amd64 linux-arm64 macos-amd64 macos-arm64 windows-amd64 windows-arm64; do
+            D2_BIN_PLATFORM=$platform uv build --wheel --out-dir dist
+          done
+          ls -l dist
+
+      - name: Check wheel tags and contents
+        run: |
+          version=$(uv run --no-project python -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          for tag in manylinux2014_x86_64.musllinux_1_1_x86_64 manylinux2014_aarch64.musllinux_1_1_aarch64 \
+                     macosx_10_12_x86_64 macosx_11_0_arm64 win_amd64 win_arm64; do
+            wheel="dist/d2_bin-${version}-py3-none-${tag}.whl"
+            test -f "$wheel" || { echo "missing $wheel"; exit 1; }
+            case "$tag" in win*) exe=d2.exe ;; *) exe=d2 ;; esac
+            unzip -l "$wheel" | grep -q "d2_bin/bin/${exe}$"
+            unzip -l "$wheel" | grep -q "d2_bin/bin/D2-LICENSE.txt$"
+          done
+          ! tar tzf dist/*.tar.gz | grep -q 'd2_bin/bin/'
+
+      - name: Run the Linux wheel
+        run: |
+          wheel=$(ls dist/*manylinux2014_x86_64*.whl)
+          printf 'a -> b: hello\n' > /tmp/x.d2
+          uv tool run --isolated --from "$wheel" d2 --version
+          uv tool run --isolated --from "$wheel" d2 /tmp/x.d2 /tmp/x.svg
+          grep -q '</svg>' /tmp/x.svg
