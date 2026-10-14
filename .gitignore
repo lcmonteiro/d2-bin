@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/
+# D2 binary and license placed by the build hook for editable installs
+src/d2_bin/bin/

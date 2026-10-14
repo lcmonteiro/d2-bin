@@ -1,0 +1,54 @@
+name: Update D2
+
+# Weekly: if D2 published a new release, pin its archive hashes, set the
+# package version and open a pull request. Merging it and pushing the tag
+# releases the new d2-bin.
+#
+# Needs "Allow GitHub Actions to create and approve pull requests" in the
+# repository's Settings > Actions > General. Pull requests opened with the
+# default token do not trigger CI on their own: re-run it from the PR (or
+# close and reopen it) before merging.
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "D2 version to pin (e.g. v0.7.2); empty for the latest"
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Pin the new D2 release
+        id: pin
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: uv run --no-project python scripts/update_d2.py ${{ inputs.version }}
+
+      - name: Open a pull request
+        if: steps.pin.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.pin.outputs.version }}
+        run: |
+          branch="update-d2-${VERSION}"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+            echo "branch $branch already exists"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -am "Update D2 to ${VERSION}"
+          git push origin "$branch"
+          gh pr create --title "Update D2 to ${VERSION}" --body "Pins the official D2 ${VERSION} release archives (SHA-256 in src/d2_bin/d2_release.json) and sets the package version to ${VERSION#v}. Release notes: https://github.com/terrastruct/d2/releases/tag/${VERSION}"
