@@ -7,7 +7,7 @@ wheels so `pip` and `uv` can install it like any other dependency: no Go, no
 install script, no separate download.
 
 ```bash
-uv add d2-bin            # or: pip install d2-bin
+uv add "d2-bin @ git+https://github.com/lcmonteiro/d2-bin@v0.7.1"   # or: pip install "d2-bin @ git+..."
 uv run d2 --version      # v0.7.1
 uv run d2 flow.d2 flow.svg --theme=0 --layout=elk
 ```
@@ -65,11 +65,11 @@ uv run pytest
 1. Bump `version` in `pyproject.toml` (or merge the update PR), merge to `main`.
 2. Push a tag `v<version>` (e.g. `v0.7.1`). The release workflow builds the six
    wheels and the sdist, smoke-tests them on Linux, macOS and Windows runners,
-   and publishes to PyPI with
-   [trusted publishing](https://docs.pypi.org/trusted-publishers/) (no token).
+   and attaches them to a GitHub release for the tag.
 
-One-time PyPI setup: add a trusted publisher for project `d2-bin`, owner
-`lcmonteiro`, repository `d2-bin`, workflow `release.yml`, environment `pypi`.
+d2-bin is not on PyPI: install it from git (above), which builds it for your
+platform, or install a wheel from a GitHub release
+(`uv pip install https://github.com/lcmonteiro/d2-bin/releases/download/v0.7.1/<wheel>`).
 
 ## License
 
