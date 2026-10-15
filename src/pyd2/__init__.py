@@ -18,6 +18,7 @@ import json
 import subprocess
 import sys
 from importlib import metadata, resources
+from typing import Any
 
 __all__ = [
     "D2_VERSION",
@@ -64,7 +65,7 @@ def executable() -> str:
     return str(path)
 
 
-def run(*args: str, check: bool = True, **kwargs) -> subprocess.CompletedProcess:
+def run(*args: str, check: bool = True, **kwargs: Any) -> subprocess.CompletedProcess[Any]:
     """Run the bundled d2 with ``args``; keyword arguments go to :func:`subprocess.run`."""
     return subprocess.run([executable(), *args], check=check, **kwargs)
 
