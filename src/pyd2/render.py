@@ -15,7 +15,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 from . import executable
 
@@ -123,7 +123,7 @@ class Options:
         return args
 
 
-def _options(options: Options | None, overrides: dict) -> Options:
+def _options(options: Options | None, overrides: dict[str, Any]) -> Options:
     if options is not None and overrides:
         raise TypeError("pass either an Options object or option keywords, not both")
     return options if options is not None else Options(**overrides)
@@ -133,7 +133,7 @@ def _options(options: Options | None, overrides: dict) -> Options:
 _GO_FUNC = re.compile(r"^\S+\.\w+Cmd: ")
 
 
-def _run(args: list[str], what: str, d2: str | None, **kwargs) -> subprocess.CompletedProcess:
+def _run(args: list[str], what: str, d2: str | None, **kwargs: Any) -> subprocess.CompletedProcess[Any]:
     proc = subprocess.run([d2 or executable(), *args], capture_output=True, check=False, **kwargs)
     if proc.returncode != 0:
         stderr = proc.stderr if isinstance(proc.stderr, str) else proc.stderr.decode("utf-8", "replace")
@@ -149,7 +149,7 @@ def render(
     *,
     cwd: PathLike | None = None,
     d2: str | None = None,
-    **option_kwargs,
+    **option_kwargs: Any,
 ) -> str:
     """Render D2 source text to SVG text.
 
@@ -157,8 +157,8 @@ def render(
     looked up; ``d2`` runs another d2 binary instead of the bundled one.
     """
     opts = _options(options, option_kwargs)
-    proc = _run([*opts.args(), "-", "-"], "<text>", d2, input=source.encode("utf-8"), cwd=cwd)
-    return proc.stdout.decode("utf-8")
+    svg: bytes = _run([*opts.args(), "-", "-"], "<text>", d2, input=source.encode("utf-8"), cwd=cwd).stdout
+    return svg.decode("utf-8")
 
 
 def render_file(
@@ -167,7 +167,7 @@ def render_file(
     options: Options | None = None,
     *,
     d2: str | None = None,
-    **option_kwargs,
+    **option_kwargs: Any,
 ) -> Path:
     """Render a ``.d2`` file to SVG (default: next to it, ``.svg``); return the SVG path."""
     opts = _options(options, option_kwargs)

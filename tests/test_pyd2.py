@@ -31,6 +31,11 @@ def test_package_version_follows_d2():
     assert version.split(".post")[0] == pyd2.D2_VERSION.lstrip("v")
 
 
+def test_package_is_typed():
+    # PEP 561: type checkers read pyd2's annotations instead of treating it as untyped.
+    assert (Path(pyd2.__file__).parent / "py.typed").is_file()
+
+
 def test_d2_license_is_shipped():
     license_file = Path(pyd2.executable()).parent / "D2-LICENSE.txt"
     assert "Mozilla Public License Version 2.0" in license_file.read_text()
